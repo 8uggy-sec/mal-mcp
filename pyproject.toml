@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mal-mcp"
+version = "1.0.1"
+description = "Native Model Context Protocol (MCP) server for Windows Flare-VM reverse engineering tools"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.2.0",
+    "pefile",
+    "psutil",
+    "yara-python",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-asyncio",
+]
+
+[project.scripts]
+mal-mcp = "mal_mcp.server:main"
+
+[tool.setuptools]
+packages = ["mal_mcp", "mal_mcp.tools"]
+
+[tool.setuptools.package-dir]
+"mal_mcp" = "."
