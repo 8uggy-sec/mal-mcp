@@ -6,6 +6,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 # Ensure parent directory is in sys.path
 pkg_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -138,18 +139,34 @@ class TestMalMcp(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(res["engine"], "none")
         self.assertIn("File not found", res["report"])
 
-    async def test_hollows_hunter_scan_params(self):
+    @patch("mal_mcp.tools.injection.resolve_tool", return_value=r"C:\Tools\hollows_hunter\hollows_hunter.exe")
+    @patch("mal_mcp.tools.injection.run_command_async")
+    async def test_hollows_hunter_scan_params(self, mock_run, mock_resolve):
         """Verify hollows_hunter_scan accepts process_name, pid, and recent_seconds."""
+        mock_run.return_value = ("Scan completed: 0 suspicious implants found.", "", 0)
         with tempfile.TemporaryDirectory() as out_dir:
             old_root = os.environ.get("MAL_MCP_OUTPUT_ROOT")
             os.environ["MAL_MCP_OUTPUT_ROOT"] = out_dir
             try:
                 res = await hollows_hunter_scan(
                     output_dir=out_dir,
-                    process_name="nonexistent_process_12345.exe",
+                    process_name="notepad.exe",
+                    pid=1234,
+                    recent_seconds=300,
                 )
-                self.assertIn("Hollows Hunter Injection Scan", res)
-                self.assertIn("Process: nonexistent_process_12345.exe", res)
+                self.assertIn("Hollows Hunter Injection Scan (Process: notepad.exe)", res)
+
+                # Verify command arguments passed to runner
+                mock_run.assert_called_once()
+                called_cmd = mock_run.call_args[0][0]
+                self.assertIn("/pname", called_cmd)
+                self.assertIn("notepad.exe", called_cmd)
+                self.assertIn("/pid", called_cmd)
+                self.assertIn("1234", called_cmd)
+                self.assertIn("/ptimes", called_cmd)
+                self.assertIn("300", called_cmd)
+                self.assertIn("/cache", called_cmd)
+                self.assertIn("2", called_cmd)
             finally:
                 if old_root is not None:
                     os.environ["MAL_MCP_OUTPUT_ROOT"] = old_root

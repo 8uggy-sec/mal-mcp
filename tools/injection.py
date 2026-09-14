@@ -67,7 +67,11 @@ async def pe_sieve_scan(pid: int, output_dir: str = r"C:\temp\mal_mcp\pe_sieve")
         return f"Process with PID {pid} not found."
 
     os.makedirs(resolved_out, exist_ok=True)
-    pe_sieve_path = resolve_tool("pe_sieve")
+    try:
+        pe_sieve_path = resolve_tool("pe_sieve")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: pe-sieve.exe was not found on Flare-VM."
+
     cmd = [pe_sieve_path, "/pid", str(pid), "/dir", resolved_out, "/shellc", "3", "/iat", "3", "/data", "3"]
 
     stdout, stderr, code = await run_command_async(cmd, timeout=120)
@@ -95,7 +99,11 @@ async def hollows_hunter_scan(
         return f"[-] Security Refusal: {e}"
 
     os.makedirs(resolved_out, exist_ok=True)
-    hh_path = resolve_tool("hollows_hunter")
+    try:
+        hh_path = resolve_tool("hollows_hunter")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: hollows_hunter.exe was not found on Flare-VM."
+
     cmd = [hh_path, "/dir", resolved_out, "/cache", "2"]
 
     has_filter = False
@@ -152,7 +160,10 @@ async def procdump_process(pid: int, output_dir: str = r"C:\temp\mal_mcp\dumps",
         proc_name = f"pid_{pid}"
 
     os.makedirs(resolved_out, exist_ok=True)
-    procdump_path = resolve_tool("procdump")
+    try:
+        procdump_path = resolve_tool("procdump")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: procdump.exe was not found on Flare-VM."
 
     dump_type = "-ma" if full_memory else "-mm"
     dump_filename = f"{proc_name}_{pid}.dmp"
