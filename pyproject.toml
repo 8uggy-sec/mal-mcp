@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mal-mcp"
+version = "1.0.1"
+description = "Native Model Context Protocol (MCP) server for Windows Flare-VM reverse engineering tools"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "8uggy-sec"}
+]
+keywords = [
+    "mcp",
+    "model-context-protocol",
+    "flare-vm",
+    "malware-analysis",
+    "reverse-engineering",
+    "dfir",
+    "threat-intelligence",
+    "security"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Developers",
+    "Topic :: Security",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: Microsoft :: Windows",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.30.0,<2.0.0",
+    "pefile",
+    "psutil",
+    "yara-python",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-asyncio",
+]
+
+[project.urls]
+Homepage = "https://github.com/8uggy-sec/mal-mcp"
+Repository = "https://github.com/8uggy-sec/mal-mcp"
+Documentation = "https://github.com/8uggy-sec/mal-mcp#readme"
+"Bug Tracker" = "https://github.com/8uggy-sec/mal-mcp/issues"
+
+[project.scripts]
+mal-mcp = "mal_mcp.server:main"
+
+[tool.setuptools]
+packages = ["mal_mcp", "mal_mcp.tools"]
+
+[tool.setuptools.package-dir]
+"mal_mcp" = "."
