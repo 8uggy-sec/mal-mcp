@@ -631,8 +631,15 @@ async def fakenet_stop(start_time: Optional[float] = None) -> str:
 async def wireshark_capture(duration: int = 20, output_pcap: str = r"C:\temp\mal_mcp\capture.pcap") -> str:
     """Capture network packets using tshark for a specified duration."""
     duration = max(1, min(300, int(duration)))
-    output_pcap = str(validate_output_path(output_pcap))
-    tshark_path = resolve_tool("tshark")
+    try:
+        output_pcap = str(validate_output_path(output_pcap))
+    except Exception as e:
+        return f"[-] Security Refusal: {e}"
+
+    try:
+        tshark_path = resolve_tool("tshark")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: tshark.exe was not found on Flare-VM."
     os.makedirs(os.path.dirname(output_pcap), exist_ok=True)
 
     cmd = [tshark_path, "-a", f"duration:{duration}", "-w", output_pcap]
@@ -660,7 +667,10 @@ async def pcap_analyze(pcap_path: str = r"C:\temp\mal_mcp\capture.pcap") -> str:
     if not os.path.isfile(pcap_path):
         return f"PCAP file not found: {pcap_path}"
 
-    tshark_path = resolve_tool("tshark")
+    try:
+        tshark_path = resolve_tool("tshark")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: tshark.exe was not found on Flare-VM."
     file_size = os.path.getsize(pcap_path)
     if file_size == 0:
         return f"PCAP file is empty (0 bytes): {pcap_path}"

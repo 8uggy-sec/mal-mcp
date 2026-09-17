@@ -141,7 +141,10 @@ async def x64dbg_load(file_path: str, arch: str = "auto") -> str:
         except Exception:
             pass
 
-    dbg_path = resolve_tool(dbg_tool)
+    try:
+        dbg_path = resolve_tool(dbg_tool)
+    except FileNotFoundError:
+        return f"[-] Tool Unavailable: {dbg_tool}.exe was not found on Flare-VM."
     res = await launch_gui_app(dbg_path, [file_path])
     return (
         f"=== Debugger Launched ===\n"
@@ -184,7 +187,10 @@ async def x64dbg_attach(target: str) -> str:
 
     bitness = _get_process_bitness(target_pid)
     dbg_tool = "x32dbg" if bitness == "x86" else "x64dbg"
-    dbg_path = resolve_tool(dbg_tool)
+    try:
+        dbg_path = resolve_tool(dbg_tool)
+    except FileNotFoundError:
+        return f"[-] Tool Unavailable: {dbg_tool}.exe was not found on Flare-VM."
 
     res = await launch_gui_app(dbg_path, ["-p", str(target_pid)])
     return (

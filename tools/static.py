@@ -17,7 +17,10 @@ async def die_analyze(file_path: str) -> str:
     except Exception as e:
         return f"[-] Security Refusal: {e}"
 
-    diec_path = resolve_tool("diec")
+    try:
+        diec_path = resolve_tool("diec")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: DetectItEasy (diec.exe) was not found on Flare-VM."
     cmd = [diec_path, "-d", resolved_path]
     stdout, stderr, code = await run_command_async(cmd, timeout=120)
     res = f"=== DetectItEasy Analysis ===\nFile: {resolved_path}\n\n{stdout}"
@@ -35,7 +38,10 @@ async def floss_extract_strings(file_path: str, min_length: int = 4, emulate_dec
     except Exception as e:
         return f"[-] Security Refusal: {e}"
 
-    floss_path = resolve_tool("floss")
+    try:
+        floss_path = resolve_tool("floss")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: FLOSS (floss.exe) was not found on Flare-VM."
     cmd = [floss_path, "-q", "-n", str(min_length)]
     if not emulate_decoded:
         cmd.extend(["--no", "decoded", "--"])
@@ -58,7 +64,10 @@ async def capa_analyze(file_path: str, verbose: bool = False) -> str:
     except Exception as e:
         return f"[-] Security Refusal: {e}"
 
-    capa_path = resolve_tool("capa")
+    try:
+        capa_path = resolve_tool("capa")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: CAPA (capa.exe) was not found on Flare-VM."
     cmd = [capa_path]
     if verbose:
         cmd.append("-v")
@@ -158,7 +167,10 @@ async def strings_extract(file_path: str, min_length: int = 6, encoding: str = "
     except Exception as e:
         return f"[-] Security Refusal: {e}"
 
-    strings_path = resolve_tool("strings")
+    try:
+        strings_path = resolve_tool("strings")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: Sysinternals strings.exe was not found on Flare-VM."
     cmd = [strings_path, "-accepteula", "-n", str(min_length)]
     if encoding == "ascii":
         cmd.append("-a")
@@ -470,7 +482,10 @@ async def sigcheck_analyze(file_path: str) -> str:
     except Exception as e:
         return f"[-] Security Refusal: {e}"
 
-    sigcheck_path = resolve_tool("sigcheck")
+    try:
+        sigcheck_path = resolve_tool("sigcheck")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: Sysinternals sigcheck.exe was not found on Flare-VM."
     cmd = [sigcheck_path, "-accepteula", "-nobanner", "-a", resolved_path]
     stdout, stderr, code = await run_command_async(cmd, timeout=60)
 
@@ -500,7 +515,10 @@ async def dnspy_decompile(assembly_path: str, output_dir: str = r"C:\temp\mal_mc
 
     target_dir = os.path.join(resolved_out, Path(resolved_asm).stem)
     os.makedirs(target_dir, exist_ok=True)
-    dnspy_path = resolve_tool("dnspy_console")
+    try:
+        dnspy_path = resolve_tool("dnspy_console")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: dnSpy.Console.exe was not found on Flare-VM."
     cmd = [dnspy_path, "-o", target_dir, resolved_asm]
     stdout, stderr, code = await run_command_async(cmd, timeout=180)
 

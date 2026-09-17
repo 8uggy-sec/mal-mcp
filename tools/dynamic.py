@@ -26,7 +26,10 @@ async def procmon_start(output_path: str = r"C:\temp\mal_mcp\procmon.pml") -> st
     except Exception as e:
         return f"[-] Security Refusal: {e}"
 
-    procmon_path = resolve_tool("procmon")
+    try:
+        procmon_path = resolve_tool("procmon")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: Sysinternals procmon.exe was not found on Flare-VM."
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # Terminate prior tracked session if running
@@ -92,7 +95,10 @@ async def procmon_stop(
     except Exception as e:
         return f"[-] Security Refusal: {e}"
 
-    procmon_path = resolve_tool("procmon")
+    try:
+        procmon_path = resolve_tool("procmon")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: Sysinternals procmon.exe was not found on Flare-VM."
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
 
     # Terminate capturing instance gracefully
@@ -239,7 +245,10 @@ async def procmon_export_csv(pml_path: str, csv_path: str) -> str:
     if not pml_p.is_file():
         return f"[-] Error: PML file does not exist: {pml_p}"
 
-    procmon_path = resolve_tool("procmon")
+    try:
+        procmon_path = resolve_tool("procmon")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: Sysinternals procmon.exe was not found on Flare-VM."
     cmd = [procmon_path, "/OpenLog", str(pml_p), "/SaveAs", str(csv_p), "/AcceptEula"]
     stdout, stderr, code = await run_command_async(cmd, timeout=90)
     if os.path.isfile(str(csv_p)):

@@ -204,7 +204,10 @@ async def de4dot_deobfuscate(file_path: str, output_file: str = "") -> str:
     except Exception as e:
         return f"[-] Security Refusal: {e}"
 
-    de4dot_path = resolve_tool("de4dot")
+    try:
+        de4dot_path = resolve_tool("de4dot")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: de4dot.exe was not found on Flare-VM."
     os.makedirs(os.path.dirname(os.path.abspath(out_resolved)), exist_ok=True)
 
     cmd = [de4dot_path, resolved_path, "-o", out_resolved]
@@ -225,7 +228,7 @@ async def de4dot_deobfuscate(file_path: str, output_file: str = "") -> str:
         lines.append(f"Status:      No changes made or deobfuscation failed (code {code})\n")
         lines.append(f"Log:\n{stdout}\n{stderr}")
 
-    return "\n".join(lines)
+    return wrap_untrusted_data(safe_truncate("\n".join(lines)), label="DE4DOT DEOBFUSCATION")
 
 
 async def extract_pe_overlay(file_path: str, output_path: str = "") -> str:
@@ -313,18 +316,22 @@ async def upx_unpack(packed_file: str, output_file: str) -> str:
         return f"[-] Security Refusal: {e}"
 
     os.makedirs(os.path.dirname(os.path.abspath(resolved_out)), exist_ok=True)
-    upx_path = resolve_tool("upx")
+    try:
+        upx_path = resolve_tool("upx")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: upx.exe was not found on Flare-VM."
     cmd = [upx_path, "-d", resolved_path, "-o", resolved_out]
 
     stdout, stderr, code = await run_command_async(cmd, timeout=60)
     if os.path.isfile(resolved_out):
-        return (
+        return wrap_untrusted_data(
             f"=== UPX Unpack Successful ===\n"
             f"Source: {resolved_path}\n"
             f"Output: {resolved_out} ({os.path.getsize(resolved_out)} bytes)\n\n"
-            f"{stdout}"
+            f"{stdout}",
+            label="UPX UNPACK"
         )
-    return f"UPX unpack failed (code {code}):\n{stderr}\n{stdout}"
+    return wrap_untrusted_data(f"UPX unpack failed (code {code}):\n{stderr}\n{stdout}", label="UPX UNPACK")
 
 
 async def unpack_detect_and_try_structured(file_path: str, output_file: str = "") -> dict:

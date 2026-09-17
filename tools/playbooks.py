@@ -529,7 +529,10 @@ async def behavioral_full(
 
 async def autoruns_analyze(filter_microsoft: bool = True, categories: str = "lste") -> str:
     """Run Sysinternals autorunsc.exe to enumerate autostart entries with non-Microsoft filtering and structured table output."""
-    autoruns_path = resolve_tool("autorunsc")
+    try:
+        autoruns_path = resolve_tool("autorunsc")
+    except FileNotFoundError:
+        return "[-] Tool Unavailable: Sysinternals autorunsc.exe was not found on Flare-VM."
     cmd = [autoruns_path, "-accepteula", "-a", categories, "-c", "-nobanner"]
     if filter_microsoft:
         cmd.append("-m")
